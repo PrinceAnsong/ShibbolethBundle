@@ -64,8 +64,8 @@ class ShibbolethListener implements ListenerInterface {
         $this->shibboleth = $shibboleth;
     }
         
-    public function handle(GetResponseEvent $event) {
-
+    public function handle(GetResponseEvent $event)
+    {
         $request = $event->getRequest();
 
         if (!$this->shibboleth->isAuthenticated($request)) { return; }
@@ -115,6 +115,6 @@ class ShibbolethListener implements ListenerInterface {
             if ($this->authenticationEntryPoint) {
                 return $event->setResponse($this->authenticationEntryPoint->start($request, $e));
             }
-        }       
+        }
     }
 }

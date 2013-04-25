@@ -64,6 +64,11 @@ class ShibbolethUserToken extends AbstractToken {
     /**
      * Returns full name of principal. This is an alias for commonName
      */
+    function getEppn()
+    {
+        return $this->getAttribute('eduPersonPrincipalName');
+    }
+
     function getFullName() {
         return $this->getAttribute('cn');
     }
@@ -154,6 +159,4 @@ class ShibbolethUserToken extends AbstractToken {
         if (!$this->hasAttribute($name)) return false;
         return (empty($value))? true : (array_search($value, $this->getArrayAttribute($name)) !== false);
     }
-    
-       
 }

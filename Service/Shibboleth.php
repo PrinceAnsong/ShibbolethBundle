@@ -31,33 +31,35 @@ class Shibboleth {
     private $handlerPath = '/Shibboleth.sso';
     private $securedHandler = true;
     private $sessionInitiatorPath = '/Login';
-    private $usernameAttribute = 'shib-person-uid';
-    private $attributeDefinitions = array(
-        'uid'           => array('header'=> 'shib-person-uid', 'multivalue'=> false),
-        'cn'            => array('header'=> 'shib-person-commonname', 'multivalue'=> false, 'charset'=> 'UTF-8'),
-        'sn'            => array('header'=> 'shib-person-surname', 'multivalue'=> false, 'charset'=> 'UTF-8'),
-        'givenName'     => array('header'=> 'shib-person-givenname', 'multivalue'=> false, 'charset'=> 'UTF-8'),
-        'mail'          => array('header'=> 'shib-person-mail', 'multivalue'=> true),
-        'ou'            => array('header'=> 'shib-person-ou', 'multivalue'=> true),
-        'telephoneNumber' => array('header'=> 'shib-person-telephonenumber', 'multivalue'=> true),
-        'facsimileTelephoneNumber' => array('header'=> 'shib-person-facsimiletelephonenumber', 'multivalue'=> true),
-        'mobile' 		=> array('header'=> 'shib-person-mobile', 'multivalue'=> true),
-        'postalAddress' => array('header'=> 'shib-person-postaladdress', 'multivalue'=> true),
-        'affiliation'   => array('header'=> 'shib-ep-unscopedaffiliation', 'multivalue'=> true),
-        'scopedAffiliation' => array('header'=> 'shib-ep-scopedaffiliation', 'multivalue'=> true),
-        'orgUnitDN'     => array('header'=> 'shib-ep-orgunitdn', 'multivalue'=> true),
-        'orgDN'         => array('header'=> 'shib-ep-orgdn', 'multivalue'=> false),
-        'logoutURL'     => array('header'=> 'shib-logouturl', 'multivalue'=> false),
-        'identityProvider' => array('header'=> 'shib-identity-provider', 'multivalue'=> false),
-        'originSite'    => array('header'=> 'shib-origon-site', 'multivalue'=> false),
-        'authenticationInstant' => array('header'=> 'shib-authentication-instant', 'multivalue' => false),
-        'employeeType' => array('header'=> 'shib-kul-employeetype', 'multivalue'=> false),
-        'studentType' => array('header'=> 'shib-kul-studenttype', 'multivalue'=> true),
-        'primouNumber' => array('header'=> 'shib-kul-primounumber', 'multivalue'=> true),
-        'ouNumber' => array('header'=> 'shib-kul-ounumber', 'multivalue'=> true),
-        'dipl' => array('header'=> 'shib-kul-dipl', 'multivalue'=> true),
-        'opl' => array('header'=> 'shib-kul-opl', 'multivalue'=> true),
-        'campus' => array('header'=> 'shib-kul-campus', 'multivalue'=> false)
+    private $usernameAttribute;
+    private $attributeDefinitions =
+    array(
+        'eduPersonPrincipalName'    => array('header' => 'eppn', 'multivalue'=> false),
+        'uid'                       => array('header' => 'shib-person-uid', 'multivalue'=> false),
+        'cn'                        => array('header' => 'shib-person-commonname', 'multivalue'=> false, 'charset'=> 'UTF-8'),
+        'sn'                        => array('header' => 'shib-person-surname', 'multivalue'=> false, 'charset'=> 'UTF-8'),
+        'givenName'                 => array('header' => 'shib-person-givenname', 'multivalue'=> false, 'charset'=> 'UTF-8'),
+        'mail'                      => array('header' => 'shib-person-mail', 'multivalue'=> true),
+        'ou'                        => array('header' => 'shib-person-ou', 'multivalue'=> true),
+        'telephoneNumber'           => array('header' => 'shib-person-telephonenumber', 'multivalue'=> true),
+        'facsimileTelephoneNumber'  => array('header' => 'shib-person-facsimiletelephonenumber', 'multivalue'=> true),
+        'mobile' 		            => array('header' => 'shib-person-mobile', 'multivalue'=> true),
+        'postalAddress'             => array('header' => 'shib-person-postaladdress', 'multivalue'=> true),
+        'affiliation'               => array('header' => 'shib-ep-unscopedaffiliation', 'multivalue'=> true),
+        'scopedAffiliation'         => array('header' => 'shib-ep-scopedaffiliation', 'multivalue'=> true),
+        'orgUnitDN'                 => array('header' => 'shib-ep-orgunitdn', 'multivalue'=> true),
+        'orgDN'                     => array('header' => 'shib-ep-orgdn', 'multivalue'=> false),
+        'logoutURL'                 => array('header' => 'shib-logouturl', 'multivalue'=> false),
+        'identityProvider'          => array('header' => 'shib-identity-provider', 'multivalue'=> false),
+        'originSite'                => array('header' => 'shib-origon-site', 'multivalue'=> false),
+        'authenticationInstant'     => array('header' => 'shib-authentication-instant', 'multivalue' => false),
+        'employeeType'              => array('header' => 'shib-kul-employeetype', 'multivalue'=> false),
+        'studentType'               => array('header' => 'shib-kul-studenttype', 'multivalue'=> true),
+        'primouNumber'              => array('header' => 'shib-kul-primounumber', 'multivalue'=> true),
+        'ouNumber'                  => array('header' => 'shib-kul-ounumber', 'multivalue'=> true),
+        'dipl'                      => array('header' => 'shib-kul-dipl', 'multivalue'=> true),
+        'opl'                       => array('header' => 'shib-kul-opl', 'multivalue'=> true),
+        'campus'                    => array('header' => 'shib-kul-campus', 'multivalue'=> false)
     );
     
     public function __construct($handlerPath,$sessionInitiatorPath, $securedHandler, $usernameAttribute, $attributeDefinitions = null) {
