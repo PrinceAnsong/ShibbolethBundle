@@ -11,9 +11,12 @@
         <parameter key="shibboleth.session_initiator_path">/Login</parameter>
         <parameter key="shibboleth.username_attribute">eppn</parameter>
         <parameter key="shibboleth.attribute_definitions" type="collection" />
+
+        <parameter key="shibboleth.attribute_definitions" type="collection" />
     </parameters>
 
     <services>
+
         <service id="shibboleth" class="%shibboleth.class%">
 	        <argument>%shibboleth.handler_path%</argument>
 	        <argument>%shibboleth.session_initiator_path%</argument>
@@ -50,6 +53,12 @@
         <service id="security.logout.handler.shibboleth"
             class="KULeuven\ShibbolethBundle\Security\ShibbolethLogoutHandler" public="false" >
             <argument type="service" id="shibboleth" />
+        </service>
+
+        <service id="shibboleth_user_provider" class="KULeuven\ShibbolethBundle\Service\ShibbolethUserProvider">
+            <argument type="service" id="shibboleth_user_provider.entity_manager"/>
+            <argument>%shibboleth_user_provider.user_class%</argument>
+            <argument>%shibboleth_user_provider.unique_user_property%</argument>
         </service>
 
     </services>

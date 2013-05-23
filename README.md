@@ -1,12 +1,13 @@
 ShibbolethBundle
 ================
 
-This bundle adds a shibboleth authentication provider for your Symfony2 project.
+This bundle adds a Shibboleth user provider to the authentication provider provided by [Thomas Peeters's fork of the original bundle (by Ronny Moreas)](https://github.com/user/repo/blob/branch/other_file.md) for your Symfony2 project.
 
 Requirements
 ------------
 * [PHP][@php] 5.3.3 and up.
 * [Symfony 2.1][@symfony]
+* A doctrine entity manager to manage your user class
 
 Installation
 ------------
@@ -24,7 +25,7 @@ ShibbolethBundle is composer-friendly.
    "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:rmoreas/ShibbolethBundle.git"
+            "url": "git@github.com:PrinceAnsong/ShibbolethBundle.git"
         }
     ],	
 ```
@@ -102,75 +103,97 @@ The above listed configuration values are the default values. To use the default
 	shibboleth: ~
 ```
 
-User Provider
--------------
+### 4. Shibboleth user provider configuration
 
-This bundle doesn't include any User Provider, but you can implement your own.
+Include the shibboleth user provider:
 
-If you store users in a database, they can be created on the fly when a users logs on for the first time on your application. Your UserProvider needs to implement the `KULeuven\ShibbolethBundle\Security\ShibbolethUserProviderInterface` interface.
-
-### Example
-
-This example uses Propel ORM to store users.
-
-```php
-	<?php 
-	namespace YourProjectNamespace\Security;
-
-	use YourProjectNamespace\Model\User;
-	use YourProjectNamespace\Model\UserQuery;
-
-	use KULeuven\ShibbolethBundle\Security\ShibbolethUserProviderInterface;
-	use KULeuven\ShibbolethBundle\Security\ShibbolethUserToken;
-
-	use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
-	use Symfony\Component\Security\Core\User\UserProviderInterface;
-	use Symfony\Component\Security\Core\User\UserInterface;
-	use Symfony\Component\Security\Core\Exception\UsernameNotFoundException;
-	use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
-
-	class UserProvider implements ShibbolethUserProviderInterface
-	{
-		public function loadUserByUsername($username)
-		{
-			$user = UserQuery::create()->findOneByUsername($username);
-			if($user){
-				return $user;
-			} else{
-				throw new UsernameNotFoundException("User ".$username. " not found.");
-			}
-		}
-		
-		public function createUser(ShibbolethUserToken $token){
-			// Create user object using shibboleth attributes stored in the token. 
-			// 
-			$user = new User();
-			$user->setUid($token->getUsername());
-			$user->setSurname($token->getSurname());
-			$user->setGivenName($token->getGivenName());
-			$user->setMail($token->getMail());
-			// If you like, you can also add default roles to the user based on shibboleth attributes. E.g.:
-			if ($token->isStudent()) $user->addRole('ROLE_STUDENT');
-			elseif ($token->isStaff()) $user->addRole('ROLE_STAFF');
-			else $user->addRole('ROLE_GUEST');
-			
-			$user->save();
-			return $user;
-		}
-
-		public function refreshUser(UserInterface $user)
-		{
-			if (!$user instanceof User) {
-				throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', get_class($user)));
-			}
-
-			return $this->loadUserByUsername($user->getUsername());
-		}
-
-		public function supportsClass($class)
-		{
-			return $class === 'YourProjectNamespace\Model\User';
-		}
-	}
+```yml
+	# app/config/security.yml
+    providers:
+        shibboleth:
+            id: shibboleth_user_provider
 ```
 
+The shibboleth user provider needs the following parameters to be configured:
+
+```yml
+	# app/config/config.yml
+	shibboleth_user_provider:
+		entity_manager: @doctrine.orm.entity_manager
+		user_class: \Path\To\My\User\Class
+		unique_user_property: eduPersonPrincipalName
+```
+
+The user class
+-------------
+
+The shibboleth user provider extracts all custom user management logic to your user class. Your user class must implement the `KULeuven\ShibbolethBundle\Model\ShibbolethUserInterface` interface.
+
+This means overriding two methods:
+
+```php
+    setupWithShibbolethCredentials(KULeuven\ShibbolethBundle\Security\ShibbolethUserToken)
+```
+
+and
+
+```php
+    processNewShibbolethToken(KULeuven\ShibbolethBundle\Security\ShibbolethUserToken)
+```
+
+The first is called when a non-existing user in your application is authenticated. It is important to have a constructor that accepts a call with no parameters. After the shibboleth user provider creates the empty user object, it will call your `setupWithShibbolethCredentials(KULeuven\ShibbolethBundle\Security\ShibbolethUserToken)` function. You can implement that function to populate your user object with the necessary data retrieved from the ShibbolethUserToken object then.
+
+The second is called each time an existing user is logged in in your application. You can use this method to update login timestamps, update possible changed properties of the user, ...
+
+```php
+	<?php
+
+	namespace Path\To\Your\User\Class;
+
+	// ...
+
+	class MyUserClass implements \KULeuven\ShibbolethBundle\Model\ShibbolethUserInterface{
+
+	    // ...
+
+        private $eduPersonPrincipalName;
+
+	    function setupWithShibbolethCredentials(\KULeuven\ShibbolethBundle\Security\ShibbolethUserToken $token){
+
+	        $this->eduPersonPrincipalName = $token->getEppn();
+	        // ...
+
+	    }
+
+	    function processNewShibbolethToken(\KULeuven\ShibbolethBundle\Security\ShibbolethUserToken $token){
+
+	        // update $eduPersonPrincipalName if changed
+
+	        if($token->getEppn() != $this->eduPersonPrincipalName){
+	            $this->eduPersonPrincipalName = $token->getEppn();
+	        }
+	        // ...
+
+	    }
+
+	}
+
+```
+
+The `ShibbolethUserInterface` interface extends Symfony's `Symfony\Component\Security\Core\User\UserInterface` interface, meaning you will have to implement its functions as well (getPassword(), getSalt(), ...).
+
+To make things easier, an abstract `KULeuven\ShibbolethBundle\Model\ShibbolethUser` class is provided in the bundle which implements defaults for some of the interface's functions.
+
+It is mostly useful when you have no other authentication methods other than Shibboleth authentication, because it overrides the unnecessary functions of Symfony's `UserInterface`
+interface with dummy implementations.
+
+Additionally, it implements the `processNewShibbolethToken(\KULeuven\ShibbolethBundle\Security\ShibbolethUserToken)` function to do nothing just so you don't have to implement that
+function if you don't need to do anything after an existing user is logged in. Of course, you can override it to fit your needs.
+
+You will have to implement the `setupWithShibbolethCredentials(\KULeuven\ShibbolethBundle\Security\ShibbolethUserToken)` function since you at least want to store some of the
+user's credentials in the `ShibbolethUserToken` object. There is no default implementation for this since this differs per application.
+
+
+
+
+That's it! This should hopefully provide a quick way to bootstrap your applications. Kudos to the previous authors for the core authentication functionality.
