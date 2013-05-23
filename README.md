@@ -1,7 +1,7 @@
 ShibbolethBundle
 ================
 
-This bundle adds a Shibboleth user provider to the authentication provider provided by [Thomas Peeters's fork of the original bundle (by Ronny Moreas)](https://github.com/user/repo/blob/branch/other_file.md) for your Symfony2 project.
+This bundle adds a Shibboleth user provider to the authentication provider provided by [Thomas Peeters's fork](https://github.com/thomaspeeters/ShibbolethBundle) of the original bundle (by Ronny Moreas) for your Symfony2 project.
 
 Requirements
 ------------
@@ -182,9 +182,7 @@ The second is called each time an existing user is logged in in your application
 
 The `ShibbolethUserInterface` interface extends Symfony's `Symfony\Component\Security\Core\User\UserInterface` interface, meaning you will have to implement its functions as well (getPassword(), getSalt(), ...).
 
-To make things easier, an abstract `KULeuven\ShibbolethBundle\Model\ShibbolethUser` class is provided in the bundle which implements defaults for some of the interface's functions.
-
-It is mostly useful when you have no other authentication methods other than Shibboleth authentication, because it overrides the unnecessary functions of Symfony's `UserInterface`
+To make things easier, an abstract `KULeuven\ShibbolethBundle\Model\ShibbolethUser` class is provided in the bundle which implements defaults for some of the interface's functions. It is mostly useful when you have no other authentication methods other than Shibboleth authentication, because it overrides the unnecessary functions of Symfony's `UserInterface`
 interface with dummy implementations.
 
 Additionally, it implements the `processNewShibbolethToken(\KULeuven\ShibbolethBundle\Security\ShibbolethUserToken)` function to do nothing just so you don't have to implement that
@@ -192,8 +190,5 @@ function if you don't need to do anything after an existing user is logged in. O
 
 You will have to implement the `setupWithShibbolethCredentials(\KULeuven\ShibbolethBundle\Security\ShibbolethUserToken)` function since you at least want to store some of the
 user's credentials in the `ShibbolethUserToken` object. There is no default implementation for this since this differs per application.
-
-
-
 
 That's it! This should hopefully provide a quick way to bootstrap your applications. Kudos to the previous authors for the core authentication functionality.
