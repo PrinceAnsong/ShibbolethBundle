@@ -55,10 +55,10 @@
             <argument type="service" id="shibboleth" />
         </service>
 
-        <service id="shibboleth_user_provider" class="KULeuven\ShibbolethBundle\Service\ShibbolethUserProvider">
-            <argument type="service" id="shibboleth_user_provider.entity_manager"/>
-            <argument>%shibboleth_user_provider.user_class%</argument>
-            <argument>%shibboleth_user_provider.unique_user_property%</argument>
+        <service id="shibboleth.user_provider" class="KULeuven\ShibbolethBundle\Service\ShibbolethUserProvider">
+            <argument type="service" id="shibboleth.user_provider.entity_manager"/>
+            <argument>%shibboleth.user_provider.user_class%</argument>
+            <argument>%shibboleth.user_provider.unique_user_property%</argument>
         </service>
 
     </services>
